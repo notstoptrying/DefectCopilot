@@ -1,0 +1,19 @@
+{"id": "q01", "question": "划痕怎么判定等级？", "category": "判定标准", "expected_docs": ["01"], "must_include": ["A 级", "B 级", "C 级"], "should_refuse": false}
+{"id": "q02", "question": "裂纹能不能修磨后交货？", "category": "判定标准", "expected_docs": ["01"], "must_include": ["不允许", "切除"], "should_refuse": false}
+{"id": "q03", "question": "麻点的密度标准是多少？", "category": "判定标准", "expected_docs": ["01"], "must_include": ["10 个/dm²", "30 个/dm²"], "should_refuse": false}
+{"id": "q04", "question": "氧化皮压入面积占比多少判 C 级？", "category": "判定标准", "expected_docs": ["01"], "must_include": ["1%"], "should_refuse": false}
+{"id": "q05", "question": "除鳞水压低于多少会出氧化皮压入？", "category": "工艺参数", "expected_docs": ["02"], "must_include": ["15 MPa"], "should_refuse": false}
+{"id": "q06", "question": "终轧温度控制在多少？", "category": "工艺参数", "expected_docs": ["02"], "must_include": ["870"], "should_refuse": false}
+{"id": "q07", "question": "工作辊粗糙度上限是多少？", "category": "工艺参数", "expected_docs": ["02", "05"], "must_include": ["1.2 μm"], "should_refuse": false}
+{"id": "q08", "question": "划痕的根因按什么顺序排查？", "category": "根因排查", "expected_docs": ["03"], "must_include": ["夹送辊", "辊道"], "should_refuse": false}
+{"id": "q09", "question": "氧化皮压入的主要成因有哪些？", "category": "根因排查", "expected_docs": ["03", "02"], "must_include": ["喷嘴", "水压"], "should_refuse": false}
+{"id": "q10", "question": "B 级缺陷一般怎么处置？", "category": "处置流程", "expected_docs": ["04"], "must_include": ["切除", "200 mm"], "should_refuse": false}
+{"id": "q11", "question": "判废需要谁签字确认？", "category": "处置流程", "expected_docs": ["04"], "must_include": ["双签"], "should_refuse": false}
+{"id": "q12", "question": "连续几卷出问题要启动 8D？", "category": "质量流程", "expected_docs": ["01", "07"], "must_include": ["3 卷", "8D"], "should_refuse": false}
+{"id": "q13", "question": "质量工单的编号规则是什么？", "category": "质量流程", "expected_docs": ["06"], "must_include": ["QT-"], "should_refuse": false}
+{"id": "q14", "question": "一级客户投诉多久内响应？", "category": "质量流程", "expected_docs": ["07"], "must_include": ["2 小时"], "should_refuse": false}
+{"id": "q15", "question": "除鳞喷嘴堵塞率超过多少必须停机？", "category": "设备点检", "expected_docs": ["05", "02"], "must_include": ["15%"], "should_refuse": false}
+{"id": "q16", "question": "历史案例里轧辊粗糙度超标造成了多少损失？", "category": "历史案例", "expected_docs": ["08"], "must_include": ["4.2"], "should_refuse": false}
+{"id": "q17", "question": "今天天气怎么样？", "category": "域外", "expected_docs": [], "must_include": [], "should_refuse": true}
+{"id": "q18", "question": "帮我写一首关于春天的诗", "category": "域外", "expected_docs": [], "must_include": [], "should_refuse": true}
+{"id": "q19", "question": "这家公司的股票代码是多少？", "category": "域外", "expected_docs": [], "must_include": [], "should_refuse": true}

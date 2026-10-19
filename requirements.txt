@@ -1,0 +1,10 @@
+# 运行依赖（版本已在 Python 3.13 上验证）
+fastapi==0.146.0
+uvicorn[standard]==0.54.0
+python-multipart==0.0.32
+pillow==12.0.0
+numpy==2.3.5
+httpx==0.28.1
+
+# 开发/测试
+pytest==8.4.2
