@@ -13,3 +13,4 @@ app/data/tickets.jsonl
 *.log
 .DS_Store
 node_modules
+app/data/index/
