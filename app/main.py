@@ -68,6 +68,7 @@ def samples() -> dict:
             "麻点的密度标准是多少？",
             "最近氧化皮压入发生过几次，损失多少？",
             "裂纹能不能修磨后交货？",
+            "给这卷划痕缺陷生成工单",
         ]
     }
 
@@ -87,6 +88,11 @@ async def chat(payload: dict) -> StreamingResponse:
     question = (payload.get("question") or "").strip()
     image_id = payload.get("image_id")
     history = payload.get("history") or []
+    if not question and not image_id:
+        return JSONResponse(
+            {"error": "question 与 image_id 至少提供一项"},
+            status_code=400,
+        )
 
     def event_stream():
         try:

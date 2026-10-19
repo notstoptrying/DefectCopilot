@@ -81,6 +81,7 @@ TOOLS_SCHEMA: list[dict] = [
                     "area_ratio": {"type": "number"},
                     "cause": {"type": "string", "description": "疑似根因"},
                     "disposal": {"type": "string", "description": "处置方式：修磨/切除/降级/判废"},
+                    "line": {"type": "string", "description": "产线：1420 或 1780，默认 1420"},
                 },
                 "required": ["defect_type", "grade"],
             },
@@ -114,7 +115,6 @@ def search_knowledge(query: str, top_k: int = TOP_K) -> ToolResult:
     hits: list[SearchHit] = index.search(expanded, top_k=max(1, min(top_k, 8)))
     data_hits = []
     for i, h in enumerate(hits, 1):
-        body = h.chunk.text if "\n" not in h.chunk.text else h.chunk.text
         data_hits.append(
             {
                 "idx": i,
@@ -122,7 +122,7 @@ def search_knowledge(query: str, top_k: int = TOP_K) -> ToolResult:
                 "doc": h.chunk.doc_id,
                 "doc_title": h.chunk.doc_title,
                 "heading": h.chunk.heading,
-                "text": body[:420],
+                "text": h.chunk.text[:420],
                 "score": round(h.score, 4),
                 "cosine": round(h.cosine, 4),
             }
@@ -191,14 +191,15 @@ def analyze_defect_image(image_id: str) -> ToolResult:
     return ToolResult("analyze_defect_image", True, det.to_dict(), f"检出 {det.defect_type}，面积占比 {det.area_ratio:.2%}，建议 {det.level} 级", int((time.time() - t0) * 1000))
 
 
-def create_ticket(coil_no: str = "", steel: str = "", defect_type: str = "未知", grade: str = "B", area_ratio: float = 0.0, cause: str = "待排查", disposal: str = "待定") -> ToolResult:
+def create_ticket(coil_no: str = "", steel: str = "", defect_type: str = "未知", grade: str = "B", area_ratio: float = 0.0, cause: str = "待排查", disposal: str = "待定", line: str = "1420") -> ToolResult:
     t0 = time.time()
     TICKET_DB.parent.mkdir(parents=True, exist_ok=True)
-    line = "L1420"
-    ticket_no = f"QT-{line}-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:3].upper()}"
+    line = line if line in ("1420", "1780") else "1420"
+    ticket_no = f"QT-L{line}-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:3].upper()}"
     record = {
         "工单编号": ticket_no,
         "创建时间": datetime.now().isoformat(timespec="seconds"),
+        "产线": f"L{line}",
         "卷号": coil_no or "未填写",
         "钢种": steel or "未填写",
         "缺陷类型": defect_type,

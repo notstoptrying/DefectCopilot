@@ -194,9 +194,21 @@ def _annotate(
     """
     names = names or CLASS_NAMES
     colors = colors or CLASS_COLORS
+    # 显示尺寸：长边压到 1000px。手机原图 4000×3000 若直接标注，
+    # float32 画布就要 ~140 MB，且字号/图例按宽度算会放大到 100px 级别。
+    w0, h0 = img.size
+    scale = min(1.0, 1000.0 / max(w0, h0))
+    if scale < 1.0:
+        img = img.resize((round(w0 * scale), round(h0 * scale)), Image.BILINEAR)
     out = img.convert("RGB").copy()
     w, h = out.size
     canvas = np.asarray(out, dtype=np.float32)
+
+    # label_map 和外接框都在 200×200 模型视场坐标系里；彩色蒙版经 Image.resize
+    # 自动放大到画布尺寸，框坐标必须按同一比例映射，否则框和色块会错位
+    # （实测 800×800 图：色块在右下角，框却画在左上角）。
+    gh, gw = (label_map.shape if label_map is not None else (200, 200))[:2]
+    sx, sy = w / gw, h / gh
 
     present: list[int] = []
     if label_map is not None and label_map.any():
@@ -226,7 +238,8 @@ def _annotate(
     for n, b in enumerate(ordered):
         cid = b.get("class_id", 0)
         color = colors.get(cid, (210, 210, 210))
-        x1, y1, x2, y2 = b["x1"], b["y1"], b["x2"], b["y2"]
+        x1, y1 = round(b["x1"] * sx), round(b["y1"] * sy)
+        x2, y2 = round(b["x2"] * sx), round(b["y2"] * sy)
         draw.rectangle([x1, y1, x2, y2], outline=color, width=stroke)
 
         ratio = b.get("ratio")
@@ -251,9 +264,9 @@ def _annotate(
             (x1, y1 - 2 * bh - 2),
         ]
         chosen = None
-        for sx, sy in spots:
-            tx = max(0, min(sx, w - bw))
-            ty = max(0, min(sy, h - bh))
+        for cx, cy in spots:
+            tx = max(0, min(cx, w - bw))
+            ty = max(0, min(cy, h - bh))
             rect = (tx, ty, tx + bw, ty + bh)
             if not any(_overlap(rect, p) for p in placed):
                 chosen = rect
@@ -420,9 +433,17 @@ class RuleDetector:
 
 
 def get_detector() -> UNetDetector | RuleDetector:
-    if WEIGHTS.exists():
-        try:
-            return UNetDetector()
-        except Exception:
-            pass
-    return RuleDetector()
+    """单例：权重 30 MB，每次重建要 ~140 ms 且占显存，进程内只加载一次。"""
+    global _DETECTOR
+    if _DETECTOR is None:
+        if WEIGHTS.exists():
+            try:
+                _DETECTOR = UNetDetector()
+            except Exception:
+                _DETECTOR = RuleDetector()
+        else:
+            _DETECTOR = RuleDetector()
+    return _DETECTOR
+
+
+_DETECTOR: UNetDetector | RuleDetector | None = None

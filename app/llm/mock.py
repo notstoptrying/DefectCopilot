@@ -22,6 +22,8 @@ from ..rag.text import detect_defect_types, has_domain_terms
 from .base import LLMClient, LLMEvent, ToolCall
 
 _STAT_HINTS = ("历史", "统计", "多少", "几起", "占比", "损失", "频率", "工单", "发生过", "上次", "趋势")
+# 开工单必须是用户明确要求，不能因为句子里有「工单」就建（那多半是在问历史统计）
+_TICKET_HINTS = ("生成工单", "开工单", "建工单", "建单", "开张工单", "开一张工单", "派个工单", "提交工单", "生成质量工单", "立单")
 
 
 def _parse(messages: list[dict]) -> tuple[str, str | None, list[dict]]:
@@ -61,6 +63,24 @@ def _case_call(question: str) -> ToolCall | None:
     elif "1780" in question:
         args["line"] = "1780"
     return ToolCall(id="c_case", name="query_case_db", arguments=args)
+
+
+def _ticket_call(question: str, image: dict | None) -> ToolCall | None:
+    """明确要求开工单时才建单；信息优先取图像判定结果，文本提问则取类型词。"""
+    if not any(h in question for h in _TICKET_HINTS):
+        return None
+    if image:
+        args: dict = {
+            "defect_type": image.get("defect_type") or "未知",
+            "grade": image.get("level") or "B",
+            "area_ratio": float(image.get("area_ratio") or 0.0),
+            "cause": "图像判定辅助，待现场确认",
+        }
+        return ToolCall(id="c_ticket", name="create_ticket", arguments=args)
+    types = detect_defect_types(question)
+    if not types:
+        return None
+    return ToolCall(id="c_ticket", name="create_ticket", arguments={"defect_type": types[0], "grade": "B"})
 
 
 class MockClient(LLMClient):
@@ -103,12 +123,26 @@ class MockClient(LLMClient):
                 yield LLMEvent("tool_calls", tool_calls=[case])
                 return
 
+        # ---------- 开工单：必须显式要求，且放在证据齐全之后 ----------
+        if "create_ticket" not in called:
+            ticket_req = _ticket_call(question, image)
+            if ticket_req:
+                yield LLMEvent("tool_calls", tool_calls=[ticket_req])
+                return
+
         # ---------- 第三步：组织回答 ----------
         max_cos = max((h.get("cosine", 0) for h in hits), default=0.0)
         weak_evidence = max_cos < MIN_EVIDENCE_SCORE
         off_domain = not has_domain_terms(question) and not image
         refused = not image and not (cases and cases.get("count")) and (weak_evidence or off_domain)
         text = compose(question, hits, image=image, cases=cases, refused=refused)
+        ticket = next((r["data"] for r in tool_results if r.get("tool") == "create_ticket" and r.get("ok")), None)
+        if ticket:
+            text = (
+                f"已生成质量工单 **{ticket.get('工单编号', '')}**"
+                f"（{ticket.get('缺陷类型', '')} · {ticket.get('等级', '')} 级 · 状态：{ticket.get('状态', '')}），"
+                f"待质检员确认。\n\n{text}"
+            )
 
         step = 26
         for i in range(0, len(text), step):
