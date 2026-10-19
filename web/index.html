@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DefectCopilot · 工业质检多模态 Agent</title>
+<link rel="stylesheet" href="/static/style.css?v=20261019g" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">DC</span>
+    <div>
+      <div class="title">DefectCopilot</div>
+      <div class="subtitle">多模态 RAG Agent · 工业质检场景</div>
+    </div>
+  </div>
+  <div class="status">
+    <span class="dot" id="statusDot"></span>
+    <span id="llmMode">连接中…</span>
+    <span class="divider"></span>
+    <span id="indexStat" class="muted"></span>
+  </div>
+</header>
+
+<main>
+  <section class="chat">
+    <div class="messages" id="messages">
+      <div class="welcome">
+        <h2>钢板表面质量智能判定</h2>
+        <p>基于 8 篇质检规程与 34 条历史工单，支持判定标准查询、根因排查、缺陷图像分析与工单生成。</p>
+        <div class="chips" id="chips"></div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <div class="attach" id="attach" hidden>
+        <img id="attachThumb" alt="预览" />
+        <div class="attach-meta">
+          <div id="attachName">已上传图像</div>
+          <div class="muted small">发送后将自动调用分割模型</div>
+        </div>
+        <button class="ghost" id="attachClear">移除</button>
+      </div>
+      <textarea id="input" rows="1" placeholder="例如：划痕怎么判定等级？（Shift + Enter 换行）"></textarea>
+      <div class="actions">
+        <button class="ghost" id="btnUpload">
+          <svg viewBox="0 0 24 24" width="15" height="15"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          上传缺陷图
+        </button>
+        <input type="file" id="file" accept="image/*" hidden />
+        <button class="primary" id="btnSend">发送</button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="panel">
+      <div class="panel-head"><h3>工具调用轨迹</h3><span class="pill" id="stepPill">0 步</span></div>
+      <div class="trace" id="trace"><div class="empty">提问后展示 Agent 的调用链</div></div>
+    </div>
+    <div class="panel grow">
+      <div class="panel-head"><h3>参考条款</h3><span class="pill" id="citePill">0 条</span></div>
+      <div class="citations" id="citations"><div class="empty">检索结果将在此溯源</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>本次耗时</h3></div>
+      <div class="metrics" id="metrics"><span class="muted small">—</span></div>
+    </div>
+  </aside>
+</main>
+
+<script src="/static/app.js?v=20261019g"></script>
+</body>
+</html>

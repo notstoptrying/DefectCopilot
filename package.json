@@ -1,0 +1,12 @@
+{
+  "name": "defectcopilot-ui-test",
+  "private": true,
+  "description": "前端流式渲染回归测试（仅开发依赖，运行服务不需要 Node）",
+  "scripts": {
+    "test:ui": "node tests/ui_stream_test.js",
+    "test": "node tests/ui_stream_test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}
