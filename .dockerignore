@@ -1,0 +1,10 @@
+__pycache__
+.venv
+.git
+app/data/uploads
+app/data/index/*.npz
+app/vision/weights
+app/vision/cache
+eval/report.json
+*.log
+.env

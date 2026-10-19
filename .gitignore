@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+app/data/uploads/*
+!app/data/uploads/.gitkeep
+app/data/index/*.npz
+app/vision/weights/*.ckpt
+app/vision/cache/*.npz
+eval/report.json
+app/data/tickets.jsonl
+*.log
+.DS_Store
+node_modules
